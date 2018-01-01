@@ -1,0 +1,4 @@
+gitlab_url: https://new.gitlab.example.com
+gitlab_user: ansible.gitlab
+gitlab_password: "{{ vault_gitlab_password }}"
+gitlab_token: "{{ vault_gitlab_token }}"

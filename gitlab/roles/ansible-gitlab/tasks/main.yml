@@ -1,0 +1,39 @@
+---
+- name: Create Gitlab Group & Project
+  hosts: gitlab
+  gather_facts: no
+  vars_prompt:
+   - name: project
+     prompt: "What is project name?"
+
+  tasks:
+   - name: Get the Variables
+     include_vars:
+       dir: ../../ansible-gitlab/vars/
+       extensions: [yml]
+     no_log: true
+
+   - name: Create a Gitlab Group
+     gitlab_group:
+       server_url: "{{ gitlab_url }}"
+       validate_certs: True
+       state:  present
+       login_user: "{{ gitlab_user }}"
+       login_password: "{{ gitlab_password }}"
+       name: "{{ project }}"
+       path: "{{ project }}"
+
+   - name: Create Project in Group / Default will be ios/android/backend_api
+     gitlab_project:
+       server_url: "{{ gitlab_url }}"
+       validate_certs: True
+       state: present
+       login_user: "{{ gitlab_user }}"
+       login_password: "{{ gitlab_password }}"
+       name: "{{ item }}"
+       group: "{{ project }}"
+       visibility_level: 0
+     with_items:
+       - ios
+       - android
+       - backend_api
