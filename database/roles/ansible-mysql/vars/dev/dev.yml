@@ -1,0 +1,4 @@
+mysql_host: db.rds.dev.example.com
+mysql_port: 3306
+mysql_user: dev_root
+mysql_password: "{{ vault_mysql_password }}"

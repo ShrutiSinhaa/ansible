@@ -1,0 +1,47 @@
+---
+- name: Create MySQL Database & Username
+  hosts: database
+  gather_facts: no
+  vars_prompt:
+   - name: project
+     prompt: "Which is project name?"
+
+   - name: env
+     prompt: "Which is env?"
+
+  tasks:
+   - name: Get the Variables
+     include_vars:
+       dir: ../../ansible-mysql/vars/{{ env }}/
+       extensions: [yml]
+     no_log: true
+
+   - name: Create a new database
+     mysql_db:
+       name: "{{ env }}_{{ project }}"
+       state:  present
+       login_host: "{{ mysql_host }}"
+       login_user: "{{ mysql_user }}"
+       login_password: "{{ mysql_password }}"
+
+   - name: Create a username with the same database name
+     mysql_user:
+       name: "{{ env }}_{{ project }}"
+       state: present
+       password: "{{ lookup('password', 'credentials/' + env + '/' + project + '/' + '/password.txt length=15') }}"
+       priv: "{{ env }}_{{ project }}.*:ALL"
+       host: '%'
+       login_host: "{{ mysql_host }}"
+       login_user: "{{ mysql_user }}"
+       login_password: "{{ mysql_password }}"
+
+   - name: Setup read-only user on database
+     mysql_user:
+       name: "{{ env }}_{{ project }}_ro"
+       state: present
+       password: "{{ lookup('password', 'credentials/' + env + '/' + project + '/' + '/password_ro.txt length=15') }}"
+       priv: "{{ env }}_{{ project }}.*:SELECT"
+       host: '%'
+       login_host: "{{ mysql_host }}"
+       login_user: "{{ mysql_user }}"
+       login_password: "{{ mysql_password }}"
